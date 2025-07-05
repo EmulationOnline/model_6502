@@ -1,0 +1,19 @@
+---
+platform: linux
+
+image_resource:
+  type: registry-image
+  source:
+    repository: rust
+    tag: bullseye
+
+inputs:
+- name: model_6502
+
+run:
+  path: /bin/bash
+  args:
+  - -c
+  - |
+    cd model_6502
+    cargo test && cargo build
