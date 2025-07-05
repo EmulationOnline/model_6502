@@ -4,5 +4,5 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-# pki_util = {git = "https://github.com/EmulationOnline/pki_util.git"}
-pki_util = {path = "../pki_util"}
+pki_util = {git = "https://github.com/EmulationOnline/pki_util.git"}
+# pki_util = {path = "../pki_util"}
