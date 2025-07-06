@@ -1,6 +1,6 @@
 # 6502 Model
 
-CI Status: ![CI Status](https://build.emulationonline.com/api/v1/teams/main/pipelines/model_6502/jobs/unit/badge)
+[CI Status](https://build.emulationonline.com/teams/main/pipelines/model_6502): ![Status](https://build.emulationonline.com/api/v1/teams/main/pipelines/model_6502/jobs/unit/badge)
 
 This is a cycle accurate model of the 65C02 chip. This model is
 produced with the support of the ChipLab, which provides cycle-by-cycle
