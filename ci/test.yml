@@ -16,4 +16,4 @@ run:
   - -c
   - |
     cd model_6502
-    cargo test && cargo build
+    cargo build && cargo test
