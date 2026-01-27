@@ -17,6 +17,7 @@ type TraceKV = HashMap<String, String>;
 fn get_trace_kv(mut trace_content: &str) -> Result<(TraceKV, &str/*rest*/), String> {
     const ALLOWED_KEYS : &[&'static str] = &[
         "InputSha256",
+        "ChipSignature",
     ];
     let mut result = HashMap::new();
     loop {
@@ -281,7 +282,7 @@ mod trace_tests {
     fn test_failing_traces() {
         // Failing traces should be valid besides having an incorrect
         // result.
-        assert_all_traces("failing_traces/", 0, |result| {
+        assert_all_traces("failing_traces/", 1, |result| {
             result.is_err() && !result.err().unwrap().is_badsetup()
         });
     }
