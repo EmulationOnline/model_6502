@@ -1,3 +1,6 @@
+db 0
+
+org $300
 .reset:
   ldx #$fa
 .mainloop:

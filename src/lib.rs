@@ -224,7 +224,9 @@ impl W6502 {
             UOp::Inc {reg} => {
                 if posedge {
                     let old = self.reg(reg);
-                    *self.mut_reg(reg) = (old + 1);
+                    *self.mut_reg(reg) = old.wrapping_add(1);
+                    self.pc += 1;
+                    self.set_addr(self.pc);
                 }
             },
             UOp::Read{src, reg} => {
@@ -333,6 +335,11 @@ impl W6502 {
                 // lda immediate
                 q(UOp::Read{src: Source::Address(self.pc+1), reg: Register::Acc});
                 self.pc += 2;
+            },
+            0xE8 => {
+                // inx. 1 byte 2 cycles
+                q(UOp::Inc{reg: Register::X});
+                // PC moved in instruction impl.
             },
             0xEA => {
                 q(UOp::Nop);
