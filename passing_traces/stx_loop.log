@@ -1,0 +1,106 @@
+===BEGIN SIGNED DATA===
+ChipSignature=6502_0.1
+InputSha256=2CQQBdP/s63FiM7JmEZwbz5j17fsdP5n5mDYknC/sR8=
+a=0xFFFF rwb=1 sync=0
+a=0xFFFF rwb=1 sync=1
+a=0xFFFF rwb=1 sync=0
+a=0x01FF rwb=1 sync=0
+a=0x01FE rwb=1 sync=0
+a=0x01FD rwb=1 sync=0
+a=0xFFFC rwb=1 sync=0
+a=0xFFFD rwb=1 sync=0
+a=0x0300 rwb=1 sync=1
+a=0x0301 rwb=1 sync=0
+a=0x0302 rwb=1 sync=1
+a=0x0303 rwb=1 sync=0
+a=0x0304 rwb=1 sync=0
+a=0xCAFE rwb=0 d=0x10 sync=0
+a=0x0305 rwb=1 sync=1
+a=0x0306 rwb=1 sync=0
+a=0x0307 rwb=1 sync=0
+a=0xDEAD rwb=0 d=0x10 sync=0
+a=0x0308 rwb=1 sync=1
+a=0x0309 rwb=1 sync=0
+a=0x030A rwb=1 sync=0
+a=0x0302 rwb=1 sync=1
+a=0x0303 rwb=1 sync=0
+a=0x0304 rwb=1 sync=0
+a=0xCAFE rwb=0 d=0x10 sync=0
+a=0x0305 rwb=1 sync=1
+a=0x0306 rwb=1 sync=0
+a=0x0307 rwb=1 sync=0
+a=0xDEAD rwb=0 d=0x10 sync=0
+a=0x0308 rwb=1 sync=1
+a=0x0309 rwb=1 sync=0
+a=0x030A rwb=1 sync=0
+a=0x0302 rwb=1 sync=1
+a=0x0303 rwb=1 sync=0
+a=0x0304 rwb=1 sync=0
+a=0xCAFE rwb=0 d=0x10 sync=0
+a=0x0305 rwb=1 sync=1
+a=0x0306 rwb=1 sync=0
+a=0x0307 rwb=1 sync=0
+a=0xDEAD rwb=0 d=0x10 sync=0
+a=0x0308 rwb=1 sync=1
+a=0x0309 rwb=1 sync=0
+a=0x030A rwb=1 sync=0
+a=0x0302 rwb=1 sync=1
+a=0x0303 rwb=1 sync=0
+a=0x0304 rwb=1 sync=0
+a=0xCAFE rwb=0 d=0x10 sync=0
+a=0x0305 rwb=1 sync=1
+a=0x0306 rwb=1 sync=0
+a=0x0307 rwb=1 sync=0
+a=0xDEAD rwb=0 d=0x10 sync=0
+a=0x0308 rwb=1 sync=1
+a=0x0309 rwb=1 sync=0
+a=0x030A rwb=1 sync=0
+a=0x0302 rwb=1 sync=1
+a=0x0303 rwb=1 sync=0
+a=0x0304 rwb=1 sync=0
+a=0xCAFE rwb=0 d=0x10 sync=0
+a=0x0305 rwb=1 sync=1
+a=0x0306 rwb=1 sync=0
+a=0x0307 rwb=1 sync=0
+a=0xDEAD rwb=0 d=0x10 sync=0
+a=0x0308 rwb=1 sync=1
+a=0x0309 rwb=1 sync=0
+a=0x030A rwb=1 sync=0
+a=0x0302 rwb=1 sync=1
+a=0x0303 rwb=1 sync=0
+a=0x0304 rwb=1 sync=0
+a=0xCAFE rwb=0 d=0x10 sync=0
+a=0x0305 rwb=1 sync=1
+a=0x0306 rwb=1 sync=0
+a=0x0307 rwb=1 sync=0
+a=0xDEAD rwb=0 d=0x10 sync=0
+a=0x0308 rwb=1 sync=1
+a=0x0309 rwb=1 sync=0
+a=0x030A rwb=1 sync=0
+a=0x0302 rwb=1 sync=1
+a=0x0303 rwb=1 sync=0
+a=0x0304 rwb=1 sync=0
+a=0xCAFE rwb=0 d=0x10 sync=0
+a=0x0305 rwb=1 sync=1
+a=0x0306 rwb=1 sync=0
+a=0x0307 rwb=1 sync=0
+a=0xDEAD rwb=0 d=0x10 sync=0
+a=0x0308 rwb=1 sync=1
+a=0x0309 rwb=1 sync=0
+a=0x030A rwb=1 sync=0
+a=0x0302 rwb=1 sync=1
+a=0x0303 rwb=1 sync=0
+a=0x0304 rwb=1 sync=0
+a=0xCAFE rwb=0 d=0x10 sync=0
+a=0x0305 rwb=1 sync=1
+a=0x0306 rwb=1 sync=0
+a=0x0307 rwb=1 sync=0
+a=0xDEAD rwb=0 d=0x10 sync=0
+a=0x0308 rwb=1 sync=1
+a=0x0309 rwb=1 sync=0
+a=0x030A rwb=1 sync=0
+a=0x0302 rwb=1 sync=1
+a=0x0303 rwb=1 sync=0
+===END SIGNED DATA===
+Signature=PAqhg9P3hwsBrNx1ufn2X2nElbUnrieAve9IHLu9Zgrh8gPw+m5R7huQ3zokP5rQK3U/kTwGYyNwAaEYSPuUhg==
+

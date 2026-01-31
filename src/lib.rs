@@ -35,6 +35,7 @@ enum Register {
     // Fake scratch registers, used as work space for
     // uops.
     Scratch1,
+    Scratch2,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -49,6 +50,9 @@ enum Source {
     // Step 2 would like to be able to use the result of #1. By reading 1
     // into a register, step 2 can use Source::RegVal as its input to use that value.
     RegVal(Register),
+    // Absolute addresses are built up during extended fetch, and based on temporary
+    // data stored into Scratch1/Scratch2
+    AddressAbsScratch,
 }
 
 struct W6502 {
@@ -79,6 +83,7 @@ struct W6502 {
     flags: u8,    // NZCIDV
     // scratch registers for uops
     scratch1: u8,
+    scratch2: u8,
 }
 
 // Pins read by the 6502
@@ -114,12 +119,22 @@ impl Outputs {
 
 impl std::fmt::Debug for Outputs {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
-        f.debug_struct("Outputs")
-            .field("address", &self.address)
-            .field("data", &self.data)
-            .field("rwb", &self.rwb)
-            .field("sync", &self.sync)
-            .finish()
+        // match log format for easier diffing
+        let addr = self.address;
+        let rwb = self.rwb as usize;
+        let sync = self.sync as usize;
+        let data = if let Some(d) = self.data {
+            format!("d=0x{d:02x} ")
+        } else {
+            String::new()
+        };
+        write!(f, "a=0x{addr:04x} rwb={rwb} {data}sync={sync}")
+        // f.debug_struct("Outputs")
+        //     .field("address", &addr)
+        //     .field("data", &self.data)
+        //     .field("rwb", &self.rwb)
+        //     .field("sync", &self.sync)
+        //     .finish()
     }
 }
 
@@ -140,6 +155,7 @@ impl W6502 {
             y: 0xca,
 
             scratch1: 0,
+            scratch2: 0,
         }
     }
 
@@ -272,16 +288,18 @@ impl W6502 {
                 self.pc += 2;
             },
             0x86 => {
-                // stx zpg
+                // stx zpg. 2 bytes 3 cycles.
                 q(UOp::Read{src: Source::Address(self.pc+1), reg: Register::Scratch1});
                 q(UOp::Write{dst: Source::RegVal(Register::Scratch1), val: Register::X});
                 self.pc += 2;
             },
             0x8E => {
-                // inx
-                q(UOp::Nop);
-                q(UOp::Inc{reg: Register::X});
-                self.pc += 1;
+                // stx abs. 3 bytes 4 cycles
+                q(UOp::Read{src: Source::Address(self.pc+1), reg: Register::Scratch1});
+                q(UOp::Read{src: Source::Address(self.pc+2), reg: Register::Scratch2});
+                // after reading the two byte dest, store.
+                q(UOp::Write{dst: Source::AddressAbsScratch, val: Register::X});
+                self.pc += 3;
             },
             0xA0 => {
                 // ldy imm
@@ -341,6 +359,7 @@ impl W6502 {
             Register::X => self.x,
             Register::Y => self.y,
             Register::Scratch1 => self.scratch1,
+            Register::Scratch2 => self.scratch2,
         }
     }
     fn mut_reg(&mut self, reg: Register) -> &mut u8{
@@ -349,6 +368,7 @@ impl W6502 {
             Register::X => &mut self.x,
             Register::Y => &mut self.y,
             Register::Scratch1 => &mut self.scratch1,
+            Register::Scratch2 => &mut self.scratch2,
         }
     }
 
@@ -357,6 +377,7 @@ impl W6502 {
         match src {
             Source::Address(v) => v,
             Source::RegVal(reg) => *self.mut_reg(reg) as u16,
+            Source::AddressAbsScratch => ((self.scratch2 as u16) << 8) | self.scratch1 as u16,
         }
     }
 }
