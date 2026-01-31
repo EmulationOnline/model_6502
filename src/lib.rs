@@ -23,6 +23,7 @@ enum UOp {
     Fetch,
     ResetRegs,
     ReadPC{first: bool, addr: u16},
+    Inc{reg: Register},
     Read{src: Source, reg: Register},
     Write{dst: Source, val: Register},
 }
@@ -111,6 +112,17 @@ impl Outputs {
     }
 }
 
+impl std::fmt::Debug for Outputs {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+        f.debug_struct("Outputs")
+            .field("address", &self.address)
+            .field("data", &self.data)
+            .field("rwb", &self.rwb)
+            .field("sync", &self.sync)
+            .finish()
+    }
+}
+
 impl W6502 {
     pub fn new() -> W6502 {
         W6502 {
@@ -193,6 +205,12 @@ impl W6502 {
                     self.decode_op(inputs.data)?;
                 }
             },
+            UOp::Inc {reg} => {
+                if posedge {
+                    let old = self.reg(reg);
+                    *self.mut_reg(reg) = (old + 1);
+                }
+            },
             UOp::Read{src, reg} => {
                 if posedge {
                     let val = self.source(src);
@@ -259,6 +277,12 @@ impl W6502 {
                 q(UOp::Write{dst: Source::RegVal(Register::Scratch1), val: Register::X});
                 self.pc += 2;
             },
+            0x8E => {
+                // inx
+                q(UOp::Nop);
+                q(UOp::Inc{reg: Register::X});
+                self.pc += 1;
+            },
             0xA0 => {
                 // ldy imm
                 q(UOp::Read{src: Source::Address(self.pc+1), reg: Register::Y});
@@ -310,6 +334,14 @@ impl W6502 {
     fn set_data(&mut self, value: u8) {
         self.outputs.data = Some(value);
         self.outputs.rwb = false;
+    }
+    fn reg(&self, reg: Register) -> u8 {
+        match reg {
+            Register::Acc => self.acc,
+            Register::X => self.x,
+            Register::Y => self.y,
+            Register::Scratch1 => self.scratch1,
+        }
     }
     fn mut_reg(&mut self, reg: Register) -> &mut u8{
         match reg {

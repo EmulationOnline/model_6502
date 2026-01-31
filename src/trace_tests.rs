@@ -185,7 +185,7 @@ fn assert_model_log(log: &str, environment: &[u8])
     let skipped_lines = reset_model(&mut cpu, &mut log);
 
     for (num, line) in log.enumerate() {
-        println!("log: {line}");
+        println!("log ({num}): {line}");
         let num = num + skipped_lines + 1;  // start counting from 1
         let fields = parse_fields(&line);
         cpu.cycle(&Inputs {
@@ -193,6 +193,7 @@ fn assert_model_log(log: &str, environment: &[u8])
             clk: false, /*unused*/
             n_reset: true,
         })?;
+        println!("cpu state: {:?}", cpu.outputs());
 
         // Every line should have a and rwb
         check_field("addr", fields["a"], cpu.outputs().address, num)?;
@@ -275,14 +276,14 @@ mod trace_tests {
 
     #[test]
     fn test_passing_traces() {
-        assert_all_traces("passing_traces/", 2, |result| result.is_ok());
+        assert_all_traces("passing_traces/", 3, |result| result.is_ok());
     }
 
     #[test]
     fn test_failing_traces() {
         // Failing traces should be valid besides having an incorrect
         // result.
-        assert_all_traces("failing_traces/", 1, |result| {
+        assert_all_traces("failing_traces/", 0, |result| {
             result.is_err() && !result.err().unwrap().is_badsetup()
         });
     }
