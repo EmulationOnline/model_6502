@@ -55,7 +55,7 @@ enum Source {
     AddressAbsScratch,
 }
 
-struct W6502 {
+pub struct W6502 {
     outputs: Outputs,
     prev_clk: bool,
 
@@ -88,18 +88,18 @@ struct W6502 {
 
 // Pins read by the 6502
 #[derive(Clone, Copy)]
-struct Inputs {
-    clk: bool,
-    n_reset: bool,    // active low reset
-    data: u8,
+pub struct Inputs {
+    pub clk: bool,
+    pub n_reset: bool,    // active low reset
+    pub data: u8,
 }
 
 // Pins set by the 6502.
-struct Outputs {
-    address: u16,
-    data: Option<u8>,   // None if reading, Some if writing.
-    rwb: bool,          // true for read, false for write
-    sync: bool,         // true for the cycle of fetching the opcode byte.
+pub struct Outputs {
+    pub address: u16,
+    pub data: Option<u8>,   // None if reading, Some if writing.
+    pub rwb: bool,          // true for read, false for write
+    pub sync: bool,         // true for the cycle of fetching the opcode byte.
 }
 
 impl Outputs {
