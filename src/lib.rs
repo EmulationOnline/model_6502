@@ -392,6 +392,7 @@ impl W6502 {
 #[cfg(test)]
 mod test {
     use super::*;
+    const OPCODE_NOP: u8 = 0xEA;
 
     #[test]
     fn test_reset() {
@@ -438,8 +439,26 @@ mod test {
         assert_eq!(0xFFFD, cpu.outputs().address);
         inputs.data = 0xDE;
 
-        // start reading from target address
+        // start reading from target address. feed a few nops,
+        // each 2 cycles.
         cpu.cycle(&inputs).unwrap();
         assert_eq!(0xDEAD, cpu.outputs().address);
+
+        inputs.data = OPCODE_NOP;
+        cpu.cycle(&inputs).unwrap();
+        assert_eq!(0xDEAE, cpu.outputs().address);
+        assert_eq!(false, cpu.outputs().sync);
+        cpu.cycle(&inputs).unwrap();
+        assert_eq!(0xDEAE, cpu.outputs().address);
+        assert_eq!(true, cpu.outputs().sync);
+        // finished first nop
+
+        cpu.cycle(&inputs).unwrap();
+        assert_eq!(0xDEAF, cpu.outputs().address);
+        assert_eq!(false, cpu.outputs().sync);
+        cpu.cycle(&inputs).unwrap();
+        assert_eq!(0xDEAF, cpu.outputs().address);
+        assert_eq!(true, cpu.outputs().sync);
+        // finished second
     }
 }
