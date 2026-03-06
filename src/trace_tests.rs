@@ -242,7 +242,7 @@ mod trace_tests {
     }
 
     // Assert some function of the result for all tests in a directory.
-    fn assert_all_traces(directory: &str, expected_count: usize, 
+    fn assert_all_traces(directory: &str, expected_count: usize,
                          expected_result: fn(TestResult)->bool) {
         let checker = checker();
         let mut count = 0;
@@ -283,7 +283,7 @@ mod trace_tests {
     fn test_failing_traces() {
         // Failing traces should be valid besides having an incorrect
         // result.
-        assert_all_traces("failing_traces/", 0, |result| {
+        assert_all_traces("failing_traces/", 1, |result| {
             result.is_err() && !result.err().unwrap().is_badsetup()
         });
     }

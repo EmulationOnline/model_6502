@@ -42,7 +42,7 @@ enum Register {
 enum Source {
     // A direct address, known at the time of decoding the address.
     Address(u16),
-    // RegVal allows uops to use the register value at the time of 
+    // RegVal allows uops to use the register value at the time of
     // usage, rather than when the opcode was initially decoded.
     // Consider a zero page instruction:
     // 1. read the operand, which holds a zero page address(u8)
