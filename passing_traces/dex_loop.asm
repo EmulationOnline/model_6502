@@ -4,6 +4,7 @@ org $300
 .reset:
   ldx #$05
 .mainloop:
+  stx $cafe
   dex
   jmp .mainloop
 

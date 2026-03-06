@@ -24,6 +24,7 @@ enum UOp {
     ResetRegs,
     ReadPC{first: bool, addr: u16},
     Inc{reg: Register},
+    Dec{reg: Register},
     Read{src: Source, reg: Register},
     Write{dst: Source, val: Register},
 }
@@ -36,6 +37,15 @@ enum Register {
     // uops.
     Scratch1,
     Scratch2,
+}
+#[derive(Clone, Copy, Debug)]
+enum Flag {
+    Negative,
+    Zero,
+    Carry,
+    Interrupt, // aka irq disable
+    Overflow,
+    Decimal,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -229,6 +239,14 @@ impl W6502 {
                     self.set_addr(self.pc);
                 }
             },
+            UOp::Dec {reg} => {
+                if posedge {
+                    let old = self.reg(reg);
+                    *self.mut_reg(reg) = old.wrapping_sub(1);
+                    self.pc += 1;
+                    self.set_addr(self.pc);
+                }
+            },
             UOp::Read{src, reg} => {
                 if posedge {
                     let val = self.source(src);
@@ -335,6 +353,11 @@ impl W6502 {
                 // lda immediate
                 q(UOp::Read{src: Source::Address(self.pc+1), reg: Register::Acc});
                 self.pc += 2;
+            },
+            0xCA => {
+                // dex ; decrease x. 1 byte 2 cycles
+                q(UOp::Dec{reg: Register::X});
+                // PC moved in instruction impl.
             },
             0xE8 => {
                 // inx. 1 byte 2 cycles
