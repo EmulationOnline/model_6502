@@ -20,13 +20,20 @@ Contributions welcome! If you would like to improve the model, a good workflow i
 For an example of adding an instruction, [Nop and Jump](https://github.com/EmulationOnline/6502_model/commit/4f3b7fe5e87a05f72396e278232fd875bc06fc8f) are a simple example, while [basic loads and stores](https://github.com/EmulationOnline/6502_model/commit/4f3b7fe5e87a05f72396e278232fd875bc06fc8f) needed adding some more flexible uops and was thus more involved.
 
 ## Roadmap / Currently implemented
-The list below gives an idea of what is currently supported. 
+The list below gives an idea of what is currently supported.
 Unchecked boxes are planned but not yet complete.
-- [ ] All official instructions are implemented (sans flags)
+- [ ] All official instructions are implemented (sans flags or timing complications)
+- [ ] page crossing timings incorporated
 - [ ] Flags are added to official instructions
 - [ ] NMI interrupt is implemented
 - [ ] IRQ interrupt is implemented
 - [ ] Unofficial instructions are implemented, + flags
+
+### Timing Complications
+Several instructions are impacted by timing complications depending on the inputs.
+- Page crossing requires an additional cycle, in order to account for the carry.
+- Branching takes an additional cycle.
+- Branching + page crossing thus results in 2 extra cycles.
 
 ## Discord
 We coordinate development discussion on Discord.

@@ -1,0 +1,3 @@
+[submodule "6502_asm"]
+	path = 6502_asm
+	url = https://github.com/EmulationOnline/6502_asm.git
