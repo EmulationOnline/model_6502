@@ -25,14 +25,17 @@ enum UOp {
     ReadPC{first: bool, addr: u16},
     Inc{reg: Register},
     Dec{reg: Register},
-    Read{src: Source, reg: Register},
-    Write{dst: Source, val: Register},
+    Read{src: Source, reg: Register},   // memory
+    Write{dst: Source, val: Register},  // memory
+    Set{dst: Register, src: Register},  // reg->reg transfers
 }
 #[derive(Clone, Copy, Debug)]
 enum Register {
     Acc,
     X,
     Y,
+    Sp,
+    Status,
     // Fake scratch registers, used as work space for
     // uops.
     Scratch1,
@@ -60,6 +63,9 @@ enum Source {
     // Step 2 would like to be able to use the result of #1. By reading 1
     // into a register, step 2 can use Source::RegVal as its input to use that value.
     RegVal(Register),
+    // Stack, as stored in sp, is a single byte.
+    // But the stack is in page 01, so the full stack address = 0x01 .. SP
+    Stack,
     // Absolute addresses are built up during extended fetch, and based on temporary
     // data stored into Scratch1/Scratch2
     AddressAbsScratch,
@@ -193,7 +199,8 @@ impl W6502 {
             return Ok(());
         }
 
-        let posedge =!self.prev_clk && inputs.clk; 
+        let posedge =!self.prev_clk && inputs.clk;
+        self.prev_clk = inputs.clk;
         // start a new uop each positive clock edge.
         let op = if posedge {
             if self.queue.len() > 0 {
@@ -257,6 +264,7 @@ impl W6502 {
             },
             UOp::ResetRegs => {
                 // TODO: initialize registers for reset
+                self.sp = 0xFD;
             },
             UOp::ReadPC{first, addr} => {
                 if posedge {
@@ -269,9 +277,15 @@ impl W6502 {
                     }
                 }
             },
+            UOp::Set{dst, src} => {
+                if posedge {
+                    // while updating, address points to next byte to fetch.
+                    self.set_addr(self.pc);
+                    *self.mut_reg(dst) = self.reg(src);
+                }
+            },
         }
 
-        self.prev_clk = inputs.clk;
         Ok(())
     }
     pub fn outputs(&self) -> &Outputs {
@@ -287,7 +301,8 @@ impl W6502 {
     fn decode_op(&mut self, opcode: u8) -> Result<(), String> {
         assert_eq!(0, self.queue.len());
         let mut q = |op: UOp| { self.queue.push_back(op); };
-        // TODO: Much repetition across opcodes allows this to be refactored.
+        // Note: the commented cycle counts include the cycle for 'fetch', as
+        // this is consistent with the masswerk docs which were the main reference.
         match opcode {
             0x4C => {
                 // jmp abs
@@ -320,6 +335,11 @@ impl W6502 {
                 // after reading the two byte dest, store.
                 q(UOp::Write{dst: Source::AddressAbsScratch, val: Register::X});
                 self.pc += 3;
+            },
+            0x9A => {
+                // txs. 1 byte 2 cycles
+                q(UOp::Set{dst: Register::Sp, src: Register::X});
+                self.pc += 1;
             },
             0xA0 => {
                 // ldy imm
@@ -386,6 +406,8 @@ impl W6502 {
     fn reg(&self, reg: Register) -> u8 {
         match reg {
             Register::Acc => self.acc,
+            Register::Sp => self.sp,
+            Register::Status => self.flags,
             Register::X => self.x,
             Register::Y => self.y,
             Register::Scratch1 => self.scratch1,
@@ -395,6 +417,8 @@ impl W6502 {
     fn mut_reg(&mut self, reg: Register) -> &mut u8{
         match reg {
             Register::Acc => &mut self.acc,
+            Register::Status => &mut self.flags,
+            Register::Sp => &mut self.sp,
             Register::X => &mut self.x,
             Register::Y => &mut self.y,
             Register::Scratch1 => &mut self.scratch1,
@@ -407,6 +431,7 @@ impl W6502 {
         match src {
             Source::Address(v) => v,
             Source::RegVal(reg) => *self.mut_reg(reg) as u16,
+            Source::Stack => 0x0100 | (self.sp as u16),
             Source::AddressAbsScratch => ((self.scratch2 as u16) << 8) | self.scratch1 as u16,
         }
     }
