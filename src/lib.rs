@@ -76,7 +76,7 @@ impl Flag {
         }
     }
     pub fn set(&self, status: &mut u8) {
-        *status |= (1 << self.bit());
+        *status |= 1 << self.bit();
     }
     pub fn clear(&self, status: &mut u8) {
         *status &= !(1 << self.bit());
@@ -567,13 +567,13 @@ mod test {
         };
 
         for i in 0 .. RESET_CYCLES {
-            cpu.cycle(&inputs);
+            cpu.cycle(&inputs).unwrap();
         }
 
         inputs.n_reset = true;
         // for the next 6 cycles, the cpu should be reading only.
         for i in 0 .. PRE_VECTOR_CYCLES {
-            cpu.cycle(&inputs);
+            cpu.cycle(&inputs).unwrap();
             assert_eq!(true, cpu.outputs().rwb);
         }
 

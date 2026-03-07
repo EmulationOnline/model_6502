@@ -220,12 +220,12 @@ fn reset_model(cpu: &mut W6502, lines: &mut std::str::Lines) -> usize {
         n_reset: false,
     };
     for i in 0 .. 2 {
-        cpu.cycle(&inputs);
+        cpu.cycle(&inputs).unwrap();
     }
     inputs.n_reset = true;
     const SKIPPED_LINES : usize = 6;
     for i in 0 .. SKIPPED_LINES {
-        cpu.cycle(&inputs);
+        cpu.cycle(&inputs).unwrap();
         lines.next();
     }
     SKIPPED_LINES
