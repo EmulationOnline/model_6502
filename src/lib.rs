@@ -30,7 +30,7 @@ enum UOp {
     Write{dst: Source, val: Register},  // memory
     Set{dst: Register, src: Register},  // reg->reg transfers
 }
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 enum Register {
     Acc,
     X,
@@ -44,12 +44,43 @@ enum Register {
 }
 #[derive(Clone, Copy, Debug)]
 enum Flag {
+    // bit 7 to 0
     Negative,
+    Overflow,
+    Five, // unused bit 5
+    Break,
+    Decimal,
+    Interrupt, // aka irq disable
     Zero,
     Carry,
-    Interrupt, // aka irq disable
-    Overflow,
-    Decimal,
+}
+
+impl Flag {
+    pub fn bit(&self) -> u8 {
+        match self {
+            Flag::Negative => 7,
+            Flag::Overflow => 6,
+            Flag::Five => 5,
+            Flag::Break => 4,
+            Flag::Decimal => 3,
+            Flag::Interrupt => 2,
+            Flag::Zero => 1,
+            Flag::Carry => 0,
+        }
+    }
+    pub fn apply(&self, status: &mut u8, val: bool) {
+        if val {
+            self.set(status);
+        } else {
+            self.clear(status);
+        }
+    }
+    pub fn set(&self, status: &mut u8) {
+        *status |= (1 << self.bit());
+    }
+    pub fn clear(&self, status: &mut u8) {
+        *status &= !(1 << self.bit());
+    }
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -192,9 +223,10 @@ impl W6502 {
             // unspecified behavior for 6 cycles, then
             // read the reset vector, then set pc
             self.queue.clear();
-            for i in 0 .. 6 {
+            for i in 0 .. 5 {
                 self.queue.push_back(UOp::Nop);
             }
+            self.queue.push_back(UOp::ResetRegs);
             self.queue.push_back(UOp::ReadPC{first: true, addr: 0xFFFC});
             self.queue.push_back(UOp::ReadPC{first: false, addr: 0xFFFD});
             return Ok(());
@@ -251,6 +283,7 @@ impl W6502 {
                 if posedge {
                     let old = self.reg(reg);
                     *self.mut_reg(reg) = old.wrapping_sub(1);
+                    self.update_flags(&[Flag::Negative, Flag::Zero], self.reg(reg));
                     self.pc += 1;
                     self.set_addr(self.pc);
                 }
@@ -266,6 +299,8 @@ impl W6502 {
             UOp::ResetRegs => {
                 // TODO: initialize registers for reset
                 self.sp = 0xFD;
+                self.flags = 0x37;
+                // self.status = 0x1FD;
             },
             UOp::ReadPC{first, addr} => {
                 if posedge {
@@ -289,8 +324,12 @@ impl W6502 {
                 if posedge {
                     if first {
                         self.set_addr(self.pc);
-                        self.scratch1 = self.reg(val);
                         self.scratch2 = self.sp.wrapping_sub(1);
+                        self.scratch1 = self.reg(val);
+                        if val == Register::Status {
+                            // pushing status always sets bit 5 and brk
+                            self.scratch1 |= (1<<5) | (1 << Flag::Break.bit());
+                        }
                     } else {
                         let src = self.source(Source::Stack);
                         self.set_addr(src);
@@ -305,6 +344,21 @@ impl W6502 {
     }
     pub fn outputs(&self) -> &Outputs {
         &self.outputs
+    }
+
+    pub fn update_flags(&mut self, flags: &[Flag], val: u8) {
+        for flag in flags {
+            match flag {
+                Flag::Negative => {
+                    flag.apply(&mut self.flags, val & 0x80 != 0);
+                }
+                Flag::Zero => {
+                    flag.apply(&mut self.flags, val == 0);
+                }
+                x => { todo!("unimplemented flag: {flag:?}"); }
+            }
+        }
+
     }
 
     //
@@ -340,6 +394,12 @@ impl W6502 {
         // this is consistent with the masswerk docs which were the main reference outside
         // of the actual chip.
         match opcode {
+            0x08 => {
+                // php. 1 byte 3 cycles.
+                // push processor status, brk and bit 5 both 1
+                self.uops_push(Register::Status);
+                self.pc += 1;
+            },
             0x48 => {
                 // pha. 1 byte 3 cycles.
                 self.uops_push(Register::Acc);

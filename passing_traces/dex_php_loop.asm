@@ -2,7 +2,11 @@ db 0
 
 org $300
 .reset:
-  ldx #$05
+  ldx #$00
+  txs
+  php
+  ldx #$05 
+  ; clear status
 .mainloop:
   stx $cafe
   dex

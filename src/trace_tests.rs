@@ -276,14 +276,14 @@ mod trace_tests {
 
     #[test]
     fn test_passing_traces() {
-        assert_all_traces("passing_traces/", 7, |result| result.is_ok());
+        assert_all_traces("passing_traces/", 8, |result| result.is_ok());
     }
 
     #[test]
     fn test_failing_traces() {
         // Failing traces should be valid besides having an incorrect
         // result.
-        assert_all_traces("failing_traces/", 3, |result| {
+        assert_all_traces("failing_traces/", 2, |result| {
             result.is_err() && !result.err().unwrap().is_badsetup()
         });
     }
