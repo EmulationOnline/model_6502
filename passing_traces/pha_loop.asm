@@ -4,9 +4,9 @@ org $300
 .reset:
   ldx #$FA
   txs  ; initialize sp
-  ldx #$FF
+  lda #$FF
 .mainloop:
-  phx
+  pha
   jmp .mainloop
 
 .loop:

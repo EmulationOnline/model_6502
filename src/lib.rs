@@ -24,6 +24,7 @@ enum UOp {
     ResetRegs,
     ReadPC{first: bool, addr: u16},
     Inc{reg: Register},
+    Push{first: bool, val: Register},
     Dec{reg: Register},
     Read{src: Source, reg: Register},   // memory
     Write{dst: Source, val: Register},  // memory
@@ -284,12 +285,46 @@ impl W6502 {
                     *self.mut_reg(dst) = self.reg(src);
                 }
             },
+            UOp::Push{first, val} => {
+                if posedge {
+                    if first {
+                        self.set_addr(self.pc);
+                        self.scratch1 = self.reg(val);
+                        self.scratch2 = self.sp.wrapping_sub(1);
+                    } else {
+                        let src = self.source(Source::Stack);
+                        self.set_addr(src);
+                        self.set_data(self.scratch1);
+                        self.sp = self.scratch2;
+                    }
+                }
+            },
         }
 
         Ok(())
     }
     pub fn outputs(&self) -> &Outputs {
         &self.outputs
+    }
+
+    //
+    // uop helpers
+    // several opcodes reuse series of uops. These functions are
+    // builders for these larger blocks, and each push multiple uops onto the queue.
+    fn uops_push(&mut self, reg: Register) {
+        // queue uops to push reg onto the stack.
+        // 2 cycles for the instruction body
+        // visible outputs:
+        // 1. sync = 0, a = pc+1
+        // 2. sync = 0, writing value to stack.
+        // x. sync = 1, done with instr
+        // While it isn't clear from watching the bus, we'll assume
+        // 1 computes new sp, saves in scratch. and
+        // 2 updates the register
+        let mut q = |op: UOp| { self.queue.push_back(op); };
+        q(UOp::Push{first: true, val: reg});
+        q(UOp::Push{first: false, val: reg});
+
     }
 
     // decode_op is called at the end of a fetch, when the
@@ -302,8 +337,14 @@ impl W6502 {
         assert_eq!(0, self.queue.len());
         let mut q = |op: UOp| { self.queue.push_back(op); };
         // Note: the commented cycle counts include the cycle for 'fetch', as
-        // this is consistent with the masswerk docs which were the main reference.
+        // this is consistent with the masswerk docs which were the main reference outside
+        // of the actual chip.
         match opcode {
+            0x48 => {
+                // pha. 1 byte 3 cycles.
+                self.uops_push(Register::Acc);
+                self.pc += 1;
+            },
             0x4C => {
                 // jmp abs
                 q(UOp::ReadPC{first: true, addr: self.pc+1});

@@ -276,7 +276,7 @@ mod trace_tests {
 
     #[test]
     fn test_passing_traces() {
-        assert_all_traces("passing_traces/", 6, |result| result.is_ok());
+        assert_all_traces("passing_traces/", 7, |result| result.is_ok());
     }
 
     #[test]
